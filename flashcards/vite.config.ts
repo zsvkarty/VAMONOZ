@@ -20,7 +20,7 @@ export default defineConfig({
   },
   server: {
     headers: {
-      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';",
+      'Content-Security-Policy': "default-src 'self' https://dostansenaprava.cz; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://dostansenaprava.cz; style-src 'self' 'unsafe-inline' https://dostansenaprava.cz; img-src 'self' data: https://dostansenaprava.cz",
       'X-Content-Type-Options': 'nosniff',
     },
   },
