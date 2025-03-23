@@ -4,7 +4,7 @@ import react from '@vitejs/plugin-react'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
-  base: '/VAMONOZ/',
+  base: '/VAMONOZ/flashcards/',
   build: {
     outDir: 'dist',
     sourcemap: true,
@@ -20,7 +20,7 @@ export default defineConfig({
   },
   server: {
     headers: {
-      'Content-Security-Policy': "default-src 'self' https://dostansenaprava.cz; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://dostansenaprava.cz; style-src 'self' 'unsafe-inline' https://dostansenaprava.cz; img-src 'self' data: https://dostansenaprava.cz",
+      'Content-Security-Policy': "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'",
       'X-Content-Type-Options': 'nosniff',
     },
   },
