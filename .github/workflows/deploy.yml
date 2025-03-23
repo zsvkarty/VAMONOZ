@@ -30,11 +30,15 @@ jobs:
           npm run build
 
       - name: Create .nojekyll file
-        run: touch ./flashcards/dist/.nojekyll
+        run: |
+          cd flashcards/dist
+          touch .nojekyll
+          echo "dostansenaprava.cz" > CNAME
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./flashcards/dist
-          force_orphan: true 
+          force_orphan: true
+          cname: dostansenaprava.cz 
