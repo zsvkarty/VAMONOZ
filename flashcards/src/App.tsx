@@ -87,6 +87,7 @@ function App() {
             cards={currentSet.cards} 
             darkMode={darkMode}
             categoryId={selectedCategory}
+            onComplete={handleBackToCategories}
           />
         ) : (
           <WelcomePage onCategorySelect={handleCategorySelect} darkMode={darkMode} />

@@ -1,32 +1,138 @@
 import { useState, useEffect } from 'react';
-import { Flashcard } from './Flashcard';
-import { Flashcard as FlashcardType } from '../data/flashcards';
+import { Flashcard } from '../data/flashcards';
 import { StudyStats } from './StudyStats';
 import { 
-  SRSCard, 
   calculateNextReview, 
   loadSRSData, 
   saveSRSData,
   getDueCards,
-  sortCardsByDueDate
+  sortCardsByDueDate,
+  SRSCard
 } from '../utils/spacedRepetition';
 
-interface FlashcardData extends FlashcardType {
-  id: number;
-  difficulty?: 'easy' | 'medium' | 'hard';
-  favorite?: boolean;
+interface FlashcardDeckProps {
+  categoryId: string;
+  cards: Flashcard[];
+  onComplete: () => void;
+  darkMode?: boolean;
 }
 
-interface FlashcardDeckProps {
-  cards: FlashcardType[];
+interface FlashcardComponentProps {
+  front: string;
+  back: string;
+  onDifficultySelect: (difficulty: 'easy' | 'medium' | 'hard') => void;
+  isFlipped: boolean;
+  onFlip: () => void;
+  isFavorite?: boolean;
+  onToggleFavorite: () => void;
   darkMode?: boolean;
-  categoryId?: string;
 }
+
+const FlashcardComponent = ({
+  front,
+  back,
+  onDifficultySelect,
+  isFlipped,
+  onFlip,
+  isFavorite,
+  onToggleFavorite,
+  darkMode = false
+}: FlashcardComponentProps) => {
+  return (
+    <div 
+      className={`w-full max-w-2xl aspect-[3/2] cursor-pointer ${
+        darkMode ? 'text-white' : 'text-gray-900'
+      }`}
+      onClick={onFlip}
+    >
+      <div className={`relative w-full h-full transition-transform duration-500 transform-gpu ${
+        isFlipped ? 'rotate-y-180' : ''
+      }`}>
+        <div className={`absolute inset-0 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        } p-8 rounded-xl shadow-lg flex flex-col justify-between backface-hidden`}>
+          <div className="flex-grow flex items-center justify-center text-2xl font-medium text-center">
+            {front}
+          </div>
+          <div className="flex justify-between mt-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavorite();
+              }}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                darkMode 
+                  ? isFavorite ? 'text-yellow-300' : 'text-gray-500 hover:text-gray-300'
+                  : isFavorite ? 'text-yellow-500' : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill={isFavorite ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+              </svg>
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onFlip();
+              }}
+              className={`p-2 rounded-full transition-colors duration-200 ${
+                darkMode 
+                  ? 'text-gray-500 hover:text-gray-300'
+                  : 'text-gray-400 hover:text-gray-600'
+              }`}
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div className={`absolute inset-0 ${
+          darkMode ? 'bg-gray-800' : 'bg-white'
+        } p-8 rounded-xl shadow-lg flex flex-col justify-between backface-hidden rotate-y-180`}>
+          <div className="flex-grow flex items-center justify-center text-2xl font-medium text-center">
+            {back}
+          </div>
+          <div className="flex justify-center gap-4 mt-4">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDifficultySelect('easy');
+              }}
+              className="px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors duration-200"
+            >
+              Easy
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDifficultySelect('medium');
+              }}
+              className="px-6 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors duration-200"
+            >
+              Medium
+            </button>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                onDifficultySelect('hard');
+              }}
+              className="px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors duration-200"
+            >
+              Hard
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const FlashcardDeck = ({ 
   cards: initialCards, 
   darkMode = false,
-  categoryId = 'default'
+  categoryId = 'default',
+  onComplete
 }: FlashcardDeckProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [cards, setCards] = useState<SRSCard[]>(() => 
@@ -323,6 +429,11 @@ export const FlashcardDeck = ({
     favorites: cards.filter(card => card.favorite).length,
   };
 
+  const handleComplete = () => {
+    saveStudySession();
+    onComplete();
+  };
+
   // Show scoreboard
   if (showScoreboard) {
     // Get cards that were improved (changed from hard to easy/medium)
@@ -421,10 +532,10 @@ export const FlashcardDeck = ({
         </div>
         {newHardCards.length === 0 && (
           <button
-            onClick={handleRestart}
+            onClick={handleComplete}
             className={`px-6 py-3 ${darkMode ? 'bg-blue-600 hover:bg-blue-700' : 'bg-blue-500 hover:bg-blue-600'} text-white rounded-lg transition-colors duration-200 font-medium shadow-sm`}
           >
-            Start New Session
+            Complete Session
           </button>
         )}
       </div>
@@ -648,7 +759,7 @@ export const FlashcardDeck = ({
       </div>
       
       <div className="perspective-1000">
-        <Flashcard
+        <FlashcardComponent
           front={currentCards[currentIndex].front}
           back={currentCards[currentIndex].back}
           onDifficultySelect={handleDifficultySelect}
